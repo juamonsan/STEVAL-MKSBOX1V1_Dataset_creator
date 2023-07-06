@@ -27,6 +27,7 @@ dependencies:
   - bzip2=1.0.8=h8ffe710_4
   - ca-certificates=2023.5.7=h56e8100_0
   - cachetools=4.2.4=pyhd8ed1ab_0
+  - cairo=1.16.0=hd694305_1014
   - certifi=2023.5.7=pyhd8ed1ab_0
   - cffi=1.15.1=py37ha95fbe2_1
   - charset-normalizer=2.1.1=pyhd8ed1ab_0
@@ -42,21 +43,35 @@ dependencies:
   - defusedxml=0.7.1=pyhd8ed1ab_0
   - entrypoints=0.4=pyhd8ed1ab_0
   - exceptiongroup=1.1.1=pyhd8ed1ab_0
+  - expat=2.5.0=h63175ca_1
   - flit-core=3.9.0=pyhd8ed1ab_0
+  - font-ttf-dejavu-sans-mono=2.37=hab24e00_0
+  - font-ttf-inconsolata=3.000=h77eed37_0
+  - font-ttf-source-code-pro=2.038=h77eed37_0
+  - font-ttf-ubuntu=0.83=hab24e00_0
+  - fontconfig=2.14.2=hbde0cde_0
+  - fonts-conda-ecosystem=1=0
+  - fonts-conda-forge=1=0
   - freetype=2.12.1=h546665d_1
+  - fribidi=1.0.10=h8d14728_0
   - frozenlist=1.3.1=py37hcc03f2d_0
   - future=0.18.2=py37h03978a9_5
   - gast=0.2.2=py_0
+  - getopt-win32=0.1=h8ffe710_0
   - gettext=0.21.1=h5728263_0
   - glib=2.76.3=h12be248_0
   - glib-tools=2.76.3=h12be248_0
   - google-auth=1.35.0=pyh6c4a22f_0
   - google-auth-oauthlib=0.4.6=pyhd8ed1ab_0
   - google-pasta=0.2.0=pyh8c360ce_0
+  - graphite2=1.3.13=1000
+  - graphviz=8.0.5=h51cb2cd_0
   - grpcio=1.46.3=py37h265e445_0
   - gst-plugins-base=1.22.4=h001b923_0
   - gstreamer=1.22.4=hb4038d2_0
+  - gts=0.7.6=h6b5321d_4
   - h5py=2.10.0=nompi_py37he280515_106
+  - harfbuzz=6.0.0=he256f1b_0
   - hdf5=1.10.6=nompi_he0bbb20_101
   - icu=70.1=h0e60522_0
   - idna=3.4=pyhd8ed1ab_0
@@ -94,7 +109,9 @@ dependencies:
   - libclang=15.0.7=default_h77d9078_2
   - libclang13=15.0.7=default_h77d9078_2
   - libdeflate=1.14=hcfcfb64_0
+  - libexpat=2.5.0=h63175ca_1
   - libffi=3.4.2=h8ffe710_5
+  - libgd=2.3.3=ha43c60c_1
   - libglib=2.76.3=he8f3873_0
   - libhwloc=2.9.1=nocuda_h15da153_6
   - libiconv=1.17=h8ffe710_0
@@ -146,12 +163,14 @@ dependencies:
   - pandas=1.2.3=py37h08fd248_0
   - pandoc=3.1.3=h57928b3_0
   - pandocfilters=1.5.0=pyhd8ed1ab_0
+  - pango=1.50.14=hdffb7b3_0
   - parso=0.8.3=pyhd8ed1ab_0
   - patsy=0.5.3=pyhd8ed1ab_0
   - pcre2=10.40=h17e33f8_0
   - pickleshare=0.7.5=py_1003
   - pillow=9.2.0=py37h42a8222_2
   - pip=23.1.2=pyhd8ed1ab_0
+  - pixman=0.40.0=h8ffe710_0
   - pkgutil-resolve-name=1.3.10=pyhd8ed1ab_0
   - ply=3.11=py_1
   - prometheus_client=0.17.0=pyhd8ed1ab_0
@@ -164,6 +183,7 @@ dependencies:
   - pyasn1=0.4.8=py_0
   - pyasn1-modules=0.2.7=py_0
   - pycparser=2.21=pyhd8ed1ab_0
+  - pydot=1.4.2=py37h03978a9_2
   - pyfiglet=0.8.post1=py_0
   - pygments=2.15.1=pyhd8ed1ab_0
   - pyjwt=2.7.0=pyhd8ed1ab_0
