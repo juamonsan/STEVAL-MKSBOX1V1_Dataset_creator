@@ -40,384 +40,359 @@ from sklearn.model_selection import train_test_split
 
 # End
 
-#Definitions
+def Supertrainer_LSTM_GRU(train_folder, test_folder, output_folder):
+    #Definitions
 
-#Copiado de notebook de Curro (definiciones de distintas RNN):
+    #Copiado de notebook de Curro (definiciones de distintas RNN):
 
-def create_1layer_lstm_model(nodes,drp,input_shape):
-    
-    #input_shape = (None, 550, 3)
-
-    rnn_model = Sequential()
-
-    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-    rnn_model.add(LSTM((nodes)))
-    rnn_model.add(Dropout(drp))
-    rnn_model.add(Dense(3, activation='softmax'))
-    
-    return rnn_model
-
-
-def create_1layer_gru_model(nodes,drp,input_shape):
-    
-    #input_shape = (None, 550, 3)
-
-    rnn_model = Sequential()
-
-    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-    rnn_model.add(GRU((nodes)))
-    rnn_model.add(Dropout(drp))
-    rnn_model.add(Dense(3, activation='softmax'))
-    
-    return rnn_model
-
-
-def create_2layer_lstm_model(nodes_1stl,nodes_2ndl,drp,input_shape):
-    
-    #input_shape = (None, 550, 3)
-
-    rnn_model = Sequential()
-
-    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-    rnn_model.add(LSTM((nodes_1stl), return_sequences=True))
-    rnn_model.add(Dropout(drp))
-    rnn_model.add(LSTM((nodes_2ndl)))
-    rnn_model.add(Dropout(drp))
-    rnn_model.add(Dense(3, activation='softmax'))
-    
-    return rnn_model
-
-
-def create_2layer_gru_model(nodes_1stl,nodes_2ndl,drp,input_shape):
-    
-    #input_shape = (None, 550, 3)
-
-    rnn_model = Sequential()
-
-    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-    rnn_model.add(GRU((nodes_1stl), return_sequences=True))
-    rnn_model.add(Dropout(drp))
-    rnn_model.add(GRU((nodes_2ndl)))
-    rnn_model.add(Dropout(drp))
-    rnn_model.add(Dense(3, activation='softmax'))
-    
-    return rnn_model
-
-
-
-#start
-
-
-print("Python version {}.{}".format(sys.version_info.major, sys.version_info.minor))
-
-print("Tensorflow version " + tf.__version__)
-
-num_GPUs=len(tf.config.experimental.list_physical_devices('GPU'))
-
-tf.config.list_physical_devices('GPU')
-
-device_lib.list_local_devices()
-
-tf.test.is_built_with_cuda()
-
-tf.debugging.set_log_device_placement(True)
-
-
-if(num_GPUs>0):
-    print("Your system has {} GPUs availables".format(num_GPUs))
-else:
-    print("No GPUs available")    
-    
-#comment next line for having debug info on the rest of the code
-tf.debugging.set_log_device_placement(False)
-
-
-#Select sensor csv folder:
-
-# Create and display a FileChooser widget
-
-full_path = ##ADD PATH (train)
-
-sensor_folder=os.path.basename(os.path.normpath(full_path))
-
-Current_file_path = os.path.join(full_path,os.listdir(full_path)[0])
-
-Current_file = open(Current_file_path) # Open first file for counting rows
-
-freq_samples=int(re.sub('[^0-9]','', sensor_folder[-7:-2])) #extracts the frequency from the directory name
-
-num_samples= len(os.listdir(full_path)) #number of .csv files in total
-tam_samples= len(Current_file.readlines())#number of lectures in a window sample (rows in each .csv)
-num_features = 3 #axis number (3 for accel) TODO: read column number from the file
-
-##print("Number of samples: {}\nSample size: {}\nNumber of features: {}".format(num_samples,tam_samples,num_features))
-##print("Frequency (from file folder name): {}".format(freq_samples))
-##print("-----------------------\nPlot example for first file:\n-----------------------")
-
-file_class=int(Current_file_path[-6:-4])-1 # Class is in the filename, at the end, just before file extension
-##print("The class for this file is {}".format(file_class))
-
-Current_file.close() # Close file
-
-DataX=np.empty([num_samples, tam_samples, num_features]) # Empty numpy array we will fill with data from .csv files
-DataY=np.empty([num_samples])
-
-for i in range (num_samples):
-    Current_file_path = os.path.join(full_path,os.listdir(full_path)[i])
-    Current_CSV=np.genfromtxt (Current_file_path, delimiter=",")
-    DataX[i]=Current_CSV
-    if np.any(np.isnan(DataX[i])):
-        print(i)
-        for k in range(0,len(DataX[i])):
-            if np.any(np.isnan(DataX[i][k])):
-                print("File {} in line {} is NaN".format(i,k))
-    file_class=int(Current_file_path[-6:-4])
-    DataY[i]=file_class-1 #first class is class 1, but now we start from 0
-
-DataY = to_categorical(DataY)        
-print("The shape of DataX array is: {}".format(np.shape(DataX))) # We check if the shape is correct
-if np.any(np.isnan(DataX)):
-    print("DANGER!! NaN values found in DataX!! Check exactly where above")
-    
-print("The shape of DataY array is: {}".format(np.shape(DataY))) 
-if np.any(np.isnan(DataY)):
-    print("DANGER!! NaN values found in DataY!!")
-
-
-X_train, X_test, y_train, y_test = train_test_split(DataX, DataY, test_size=0.15, random_state=100, stratify=DataY)
-print("X_train shape: {} || X_test shape: {}".format(np.shape(X_train), np.shape(X_test))) # We check if the shape is correct
-print("y_train shape: {} || y_test shape: {}".format(np.shape(y_train), np.shape(y_test)))
-
-
-#Model Creation
-
-#Parameters
-RNN_type = 'LSTM' #specify GRU or LSTM
-layers = 2 #specify 1 or 2 layers
-nodes_1 = 4 # Specify nodes for first layer 32
-nodes_2 = 2 # Specify nodes for second layer 16
-drp = 0.3 # Specify droput rate
-
-input_shape=(None,tam_samples, num_features) #this should not be changed since it depends on the loaded file
-
-if RNN_type == 'GRU':
-    if layers == 1:
-        model_RNN = create_1layer_gru_model(nodes_1,drp,input_shape)
-        model_RNN_name = 'GRU_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
-    elif layers == 2:
-        model_RNN = create_2layer_gru_model(nodes_1,nodes_2,drp,input_shape)
-        model_RNN_name = 'GRU_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
-    else:
-        print("ERROR, incorrect parameters")
-elif RNN_type == 'LSTM':
-    if layers == 1:
-        model_RNN = create_1layer_lstm_model(nodes_1,drp,input_shape)
-        model_RNN_name = 'LSTM_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
-    elif layers == 2:
-        model_RNN = create_2layer_lstm_model(nodes_1,nodes_2,drp,input_shape)
-        model_RNN_name = 'LSTM_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
-    else:
-        print("ERROR, incorrect parameters")
-else:
-    print("ERROR, incorrect parameters")
-
-      
-#model_RNN.summary()
-
-#Model save
-
-# Create model folder
-models_folder = "DATA\\models"
-#sensor_folder = sensor_folder # This was read some boxes before, when dataset was loaded
-sensor_model_folder=os.path.join(models_folder,sensor_folder)
-if not os.path.exists(sensor_model_folder): 
-                os.makedirs(sensor_model_folder)
+    def create_1layer_lstm_model(nodes,drp,input_shape):
         
-#set filename    
-filename_txt="Summary_{}.txt".format(model_RNN_name)
+        #input_shape = (None, 550, 3)
 
-#save summary report in a txt
-with open(os.path.join(sensor_model_folder,filename_txt), 'w') as f:
-    model_RNN.summary(print_fn=lambda x: f.write(x + '\n'))
-f.close()
+        rnn_model = Sequential()
 
-#plot model
-tf.keras.utils.plot_model(
-    model_RNN,
-    #to_file="Model_{}.png".format(model_RNN_name),
-    show_shapes=False,
-    #show_dtype=False,
-    show_layer_names=True,
-    rankdir="TB",
-    expand_nested=False,
-    dpi=96,
-    #layer_range=None,
-    #show_layer_activations=False,
-    #show_trainable=False,
-)
-
-#Compile
-
-opt = tf.keras.optimizers.Adam(learning_rate=0.002)
-
-model_RNN.compile(loss='categorical_crossentropy',
-        optimizer=opt,
-        metrics=["accuracy"])
-
-#Train
-
-class train_print_cb(keras.callbacks.Callback):
-
-    def on_epoch_end(self, epoch, logs=None):
-        keys = list(logs.keys())
-        watch1 = keys[0] # watching first key (loss)
-        print(f'epoch {epoch} {watch1}: {logs[watch1]:.3f}          ', end = '\r')
+        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+        rnn_model.add(LSTM((nodes)))
+        rnn_model.add(Dropout(drp))
+        rnn_model.add(Dense(3, activation='softmax'))
+        
+        return rnn_model
 
 
-epochs = 1000
-batch_size = 32
+    def create_1layer_gru_model(nodes,drp,input_shape):
+        
+        #input_shape = (None, 550, 3)
 
-callbacks = [
-    keras.callbacks.ModelCheckpoint(
-        "best_model.h5", save_best_only=True, monitor="val_loss"
-    ),
-    keras.callbacks.ReduceLROnPlateau(
-        monitor="val_loss", factor=0.5, patience=20, min_lr=0.0001
-    ),
-    keras.callbacks.EarlyStopping(monitor="val_loss", patience=70, verbose=1),
-    train_print_cb()
-]
-#print("Training starting soon...")
-with tf.device('/gpu:0'):
-    history = model_RNN.fit(
-        X_train,
-        y_train,
-        batch_size=batch_size,
-        epochs=epochs,
-        callbacks=callbacks,
-        validation_data = (X_test, y_test),
-        verbose=0,
-    )
+        rnn_model = Sequential()
+
+        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+        rnn_model.add(GRU((nodes)))
+        rnn_model.add(Dropout(drp))
+        rnn_model.add(Dense(3, activation='softmax'))
+        
+        return rnn_model
+
+
+    def create_2layer_lstm_model(nodes_1stl,nodes_2ndl,drp,input_shape):
+        
+        #input_shape = (None, 550, 3)
+
+        rnn_model = Sequential()
+
+        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+        rnn_model.add(LSTM((nodes_1stl), return_sequences=True))
+        rnn_model.add(Dropout(drp))
+        rnn_model.add(LSTM((nodes_2ndl)))
+        rnn_model.add(Dropout(drp))
+        rnn_model.add(Dense(3, activation='softmax'))
+        
+        return rnn_model
+
+
+    def create_2layer_gru_model(nodes_1stl,nodes_2ndl,drp,input_shape):
+        
+        #input_shape = (None, 550, 3)
+
+        rnn_model = Sequential()
+
+        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+        rnn_model.add(GRU((nodes_1stl), return_sequences=True))
+        rnn_model.add(Dropout(drp))
+        rnn_model.add(GRU((nodes_2ndl)))
+        rnn_model.add(Dropout(drp))
+        rnn_model.add(Dense(3, activation='softmax'))
+        
+        return rnn_model
+
+
+    def Model_creation(RNN_type, layers, nodes, sensor_model_folder)
+
+        #Parameters
+        nodes_1 = nodes # Specify nodes for first layer 32
+        nodes_2 = nodes_1/2 # Specify nodes for second layer 16
+        drp = 0.3 # Specify droput rate
+
+        input_shape=(None,tam_samples, num_features) #this should not be changed since it depends on the loaded file
+
+        if RNN_type == 'GRU':
+            if layers == 1:
+                model_RNN = create_1layer_gru_model(nodes_1,drp,input_shape)
+                model_RNN_name = 'GRU_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
+            elif layers == 2:
+                model_RNN = create_2layer_gru_model(nodes_1,nodes_2,drp,input_shape)
+                model_RNN_name = 'GRU_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
+            else:
+                print("ERROR, incorrect parameters")
+        elif RNN_type == 'LSTM':
+            if layers == 1:
+                model_RNN = create_1layer_lstm_model(nodes_1,drp,input_shape)
+                model_RNN_name = 'LSTM_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
+            elif layers == 2:
+                model_RNN = create_2layer_lstm_model(nodes_1,nodes_2,drp,input_shape)
+                model_RNN_name = 'LSTM_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
+            else:
+                print("ERROR, incorrect parameters")
+        else:
+            print("ERROR, incorrect parameters")
+
+              
+        #model_RNN.summary()
+
+        #Model save
+
+        # Create model folder
+        models_folder = "DATA\\models"
+        sensor_model_folder=os.path.join(models_folder,sensor_folder)
+        if not os.path.exists(sensor_model_folder): 
+                        os.makedirs(sensor_model_folder)
+                
+        #set filename    
+        filename_txt="Summary_{}.txt".format(model_RNN_name)
+
+        #save summary report in a txt
+        with open(os.path.join(sensor_model_folder,filename_txt), 'w') as f:
+            model_RNN.summary(print_fn=lambda x: f.write(x + '\n'))
+        f.close()
+
+        #Compile
+
+        opt = tf.keras.optimizers.Adam(learning_rate=0.002)
+
+        model_RNN.compile(loss='categorical_crossentropy',
+                optimizer=opt,
+                metrics=["accuracy"])
+        
+        return model_RNN
+
+
+    def Model_trainer(model_RNN, sensor_model_folder, X_train, y_train):
+
+        #Train
+
+        class train_print_cb(keras.callbacks.Callback):
+
+            def on_epoch_end(self, epoch, logs=None):
+                keys = list(logs.keys())
+                watch1 = keys[0] # watching first key (loss)
+                print(f'epoch {epoch} {watch1}: {logs[watch1]:.3f}          ', end = '\r')
+
+
+        epochs = 1000
+        batch_size = 32
+
+        callbacks = [
+            keras.callbacks.ModelCheckpoint(
+                "best_model.h5", save_best_only=True, monitor="val_loss"
+            ),
+            keras.callbacks.ReduceLROnPlateau(
+                monitor="val_loss", factor=0.5, patience=20, min_lr=0.0001
+            ),
+            keras.callbacks.EarlyStopping(monitor="val_loss", patience=70, verbose=1),
+            train_print_cb()
+        ]
+        #print("Training starting soon...")
+        with tf.device('/gpu:0'):
+            history = model_RNN.fit(
+                X_train,
+                y_train,
+                batch_size=batch_size,
+                epochs=epochs,
+                callbacks=callbacks,
+                validation_data = (X_test, y_test),
+                verbose=0,
+            )
+            
+        #print("Training done!!")
+
+        #Model save
+        best_model_RNN_name = 'best_model_{}.h5'.format(model_RNN_name)
+        models_folder = "DATA\\models"
+        #sensor_folder = sensor_folder # This was read some boxes before, when dataset was loaded
+        sensor_model_folder=os.path.join(models_folder,sensor_folder) 
+
+        if not os.path.exists(sensor_model_folder): 
+                        os.makedirs(sensor_model_folder)
+
+
+        model_RNN.save(os.path.join(sensor_model_folder, best_model_RNN_name))
+        #print("Model succesfully saved in {}".format(sensor_model_folder))
+
+        #save progression graph
+        metric = "accuracy"
+        plt.figure()
+        plt.plot(history.history[metric])
+        plt.plot(history.history["val_" + metric])
+        plt.title("model " + metric)
+        plt.ylabel(metric, fontsize="large")
+        plt.xlabel("epoch", fontsize="large")
+        plt.legend(["train", "val"], loc="best")
+
+        figname_pdf="MT_{}.pdf".format(model_RNN_name)
+        figname_png="MT_{}.png".format(model_RNN_name)
+        plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
+        plt.savefig(os.path.join(sensor_model_folder,figname_png))
+
+        #plt.show()
+        plt.close()
+
+
+    def Model_evaluator(MODELPATH, sensor_model_folder, model_RNN_name, TestDataX, TestDataY):
+
+        model = tf.keras.models.load_model(MODELPATH)
+        pred = model.predict(TestDataX)
+
+        # CONF MATRIX
+        y_pred = np.argmax(pred, axis = 1)
+        p = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2])
+        p_norm = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2], normalize='true')
+
+        T_lables = ['STOP','NEW','OLD']    
+
+        ax= plt.subplot()
+
+        # Set values format
+        values = ["{0:0.0f}".format(x) for x in p.flatten()]
+
+        # Find percentages and set format
+        percentages = ["{0:.1%}".format(x) for x in p_norm.flatten()]
+
+        # Combine classes, values and percentages to show 
+        combined = [f"{i}\n{j}" for i, j in zip(values, percentages)]
+        combined = np.asarray(combined).reshape(3,3)
+
+        sns.heatmap(p_norm, annot=combined, fmt='', ax=ax, cmap="Greens", cbar_kws={"ticks":[0,0.5,1], "format":'%.1f'});  #annot=True to annotate cells
+
+        # labels, title and ticks
+        ax.set_xlabel('Predicted labels');ax.set_ylabel('True labels'); 
+        ax.set_title('Confusion Matrix'); 
+        ax.xaxis.set_ticklabels(T_lables); ax.yaxis.set_ticklabels(T_lables);
+
+        # save the figure
+        figname_pdf="CM_{}.pdf".format(model_RNN_name)
+        figname_png="CM_{}.png".format(model_RNN_name)
+        plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
+        plt.savefig(os.path.join(sensor_model_folder,figname_png))
+
+        plt.close()
+
+        # REPORT
+        report = sklearn.metrics.classification_report(TestDataY.argmax(axis=1),
+                                                       y_pred,
+                                                       target_names=['STOP','NEW', 'OLD'],
+                                                       output_dict=True)
+
+        report_filename="Report_{}.csv".format(model_RNN_name)
+
+        report_df = pd.DataFrame(report).transpose()
+
+        report_df.to_csv(os.path.join(sensor_model_folder,report_filename))
+        
+
+
+
+    #start
+
+
+        
+    #comment next line for having debug info on the rest of the code
+    tf.debugging.set_log_device_placement(False)
+
+
+    # TRAIN SET CREATOR
+    #Select sensor csv folder:
+
+    full_path = train_folder
+
+    sensor_folder=os.path.basename(os.path.normpath(full_path))
+
+    Current_file_path = os.path.join(full_path,os.listdir(full_path)[0])
+
+    Current_file = open(Current_file_path) # Open first file for counting rows
+
+    freq_samples=int(re.sub('[^0-9]','', sensor_folder[-7:-2])) #extracts the frequency from the directory name
+
+    num_samples= len(os.listdir(full_path)) #number of .csv files in total
+    tam_samples= len(Current_file.readlines())#number of lectures in a window sample (rows in each .csv)
+    num_features = 3 #axis number (3 for accel) TODO: read column number from the file
+
+    ##print("Number of samples: {}\nSample size: {}\nNumber of features: {}".format(num_samples,tam_samples,num_features))
+    ##print("Frequency (from file folder name): {}".format(freq_samples))
+    ##print("-----------------------\nPlot example for first file:\n-----------------------")
+
+    file_class=int(Current_file_path[-6:-4])-1 # Class is in the filename, at the end, just before file extension
+    ##print("The class for this file is {}".format(file_class))
+
+    Current_file.close() # Close file
+
+    DataX=np.empty([num_samples, tam_samples, num_features]) # Empty numpy array we will fill with data from .csv files
+    DataY=np.empty([num_samples])
+
+    for i in range (num_samples):
+        Current_file_path = os.path.join(full_path,os.listdir(full_path)[i])
+        Current_CSV=np.genfromtxt (Current_file_path, delimiter=",")
+        DataX[i]=Current_CSV
+        if np.any(np.isnan(DataX[i])):
+            print(i)
+            for k in range(0,len(DataX[i])):
+                if np.any(np.isnan(DataX[i][k])):
+                    print("File {} in line {} is NaN".format(i,k))
+        file_class=int(Current_file_path[-6:-4])
+        DataY[i]=file_class-1 #first class is class 1, but now we start from 0
+
+    DataY = to_categorical(DataY)        
+    print("The shape of DataX array is: {}".format(np.shape(DataX))) # We check if the shape is correct
+    if np.any(np.isnan(DataX)):
+        print("DANGER!! NaN values found in DataX!! Check exactly where above")
+        
+    print("The shape of DataY array is: {}".format(np.shape(DataY))) 
+    if np.any(np.isnan(DataY)):
+        print("DANGER!! NaN values found in DataY!!")
+
+
+    X_train, X_test, y_train, y_test = train_test_split(DataX, DataY, test_size=0.15, random_state=100, stratify=DataY)
+    print("X_train shape: {} || X_test shape: {}".format(np.shape(X_train), np.shape(X_test))) # We check if the shape is correct
+    print("y_train shape: {} || y_test shape: {}".format(np.shape(y_train), np.shape(y_test)))
+
+
+    #TEST SET CREATOR
     
-#print("Training done!!")
+    full_path_test = #TEST FOLDER PATH
 
-#Model save
-best_model_RNN_name = 'best_model_{}.h5'.format(model_RNN_name)
-models_folder = "DATA\\models"
-#sensor_folder = sensor_folder # This was read some boxes before, when dataset was loaded
-sensor_model_folder=os.path.join(models_folder,sensor_folder) 
+    Current_file_path_test = os.path.join(full_path_test,os.listdir(full_path_test)[0])
 
-if not os.path.exists(sensor_model_folder): 
-                os.makedirs(sensor_model_folder)
+    Current_file_test = open(Current_file_path_test) # Open first file for counting rows
+
+    num_samples_test= len(os.listdir(full_path_test)) #number of .csv files in total
+    tam_samples_test= len(Current_file_test.readlines())#number of lectures in a window sample (rows in each .csv)
+    num_features_test = 3 #axis number (3 for accel) TODO: read column number from the file
+
+    ##print("Number of samples: {}\nSample size: {}\nNumber of features: {}".format(num_samples_test,tam_samples_test,num_features_test))
+    ##print("-----------------------\nPlot example for first file:\n-----------------------")
+
+    file_class_test=int(Current_file_path_test[-6:-4])-1 # Class is in the filename, at the end, just before file extension
+    ##print("The class for this file is {}".format(file_class_test))
+
+    Current_file_test.close() # Close file
+
+    TestDataX=np.empty([num_samples, tam_samples, num_features]) # Empty numpy array we will fill with data from .csv files
+    TestDataY=np.empty([num_samples])
+
+    for i in range (num_samples):
+        Current_file_path = os.path.join(full_path,os.listdir(full_path)[i])
+        Current_CSV=np.genfromtxt (Current_file_path, delimiter=",")
+        TestDataX[i]=Current_CSV
+
+        file_class=int(Current_file_path[-6:-4])
+        TestDataY[i]=file_class-1 #first class is class 1, but now we start from 0
+
+    TestDataY = to_categorical(TestDataY)
+
+    if np.any(np.isnan(DataX)):
+        print("DANGER!! NaN values found in DataX!!")
+
+    if np.any(np.isnan(DataY)):
+        print("DANGER!! NaN values found in DataY!!")
 
 
-model_RNN.save(os.path.join(sensor_model_folder, best_model_RNN_name))
-print("Model succesfully saved in {}".format(sensor_model_folder))
-
-#save progression graph
-metric = "accuracy"
-plt.figure()
-plt.plot(history.history[metric])
-plt.plot(history.history["val_" + metric])
-plt.title("model " + metric)
-plt.ylabel(metric, fontsize="large")
-plt.xlabel("epoch", fontsize="large")
-plt.legend(["train", "val"], loc="best")
-
-figname_pdf="MT_{}.pdf".format(model_RNN_name)
-figname_png="MT_{}.png".format(model_RNN_name)
-plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
-plt.savefig(os.path.join(sensor_model_folder,figname_png))
-
-#plt.show()
-plt.close()
-
-
-full_path_test = #TEST FOLDER PATH
-
-Current_file_path_test = os.path.join(full_path_test,os.listdir(full_path_test)[0])
-
-Current_file_test = open(Current_file_path_test) # Open first file for counting rows
-
-num_samples_test= len(os.listdir(full_path_test)) #number of .csv files in total
-tam_samples_test= len(Current_file_test.readlines())#number of lectures in a window sample (rows in each .csv)
-num_features_test = 3 #axis number (3 for accel) TODO: read column number from the file
-
-##print("Number of samples: {}\nSample size: {}\nNumber of features: {}".format(num_samples_test,tam_samples_test,num_features_test))
-##print("-----------------------\nPlot example for first file:\n-----------------------")
-
-file_class_test=int(Current_file_path_test[-6:-4])-1 # Class is in the filename, at the end, just before file extension
-##print("The class for this file is {}".format(file_class_test))
-
-Current_file_test.close() # Close file
-
-TestDataX=np.empty([num_samples, tam_samples, num_features]) # Empty numpy array we will fill with data from .csv files
-TestDataY=np.empty([num_samples])
-
-for i in range (num_samples):
-    Current_file_path = os.path.join(full_path,os.listdir(full_path)[i])
-    Current_CSV=np.genfromtxt (Current_file_path, delimiter=",")
-    TestDataX[i]=Current_CSV
-
-    file_class=int(Current_file_path[-6:-4])
-    TestDataY[i]=file_class-1 #first class is class 1, but now we start from 0
-
-TestDataY = to_categorical(TestDataY)
-
-if np.any(np.isnan(DataX)):
-    print("DANGER!! NaN values found in DataX!!")
-
-if np.any(np.isnan(DataY)):
-    print("DANGER!! NaN values found in DataY!!")
-
-# MODEL VALIDATION
-model = tf.keras.models.load_model(MODELPATH)#TO DO ADD MODELPATH
-pred = model.predict(TestDataX)
-
-# CONF MATRIX
-y_pred = np.argmax(pred, axis = 1)
-p = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2])
-p_norm = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2], normalize='true')
-
-T_lables = ['STOP','NEW','OLD']    
-
-ax= plt.subplot()
-
-# Set values format
-values = ["{0:0.0f}".format(x) for x in p.flatten()]
-
-# Find percentages and set format
-percentages = ["{0:.1%}".format(x) for x in p_norm.flatten()]
-
-# Combine classes, values and percentages to show 
-combined = [f"{i}\n{j}" for i, j in zip(values, percentages)]
-combined = np.asarray(combined).reshape(3,3)
-
-sns.heatmap(p_norm, annot=combined, fmt='', ax=ax, cmap="Greens", cbar_kws={"ticks":[0,0.5,1], "format":'%.1f'});  #annot=True to annotate cells
-
-# labels, title and ticks
-ax.set_xlabel('Predicted labels');ax.set_ylabel('True labels'); 
-ax.set_title('Confusion Matrix'); 
-ax.xaxis.set_ticklabels(T_lables); ax.yaxis.set_ticklabels(T_lables);
-
-# save the figure
-figname_pdf="CM_{}.pdf".format(model_RNN_name)
-figname_png="CM_{}.png".format(model_RNN_name)
-plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
-plt.savefig(os.path.join(sensor_model_folder,figname_png))
-
-plt.close()
-
-# REPORT
-report = sklearn.metrics.classification_report(TestDataY.argmax(axis=1),
-                                               y_pred,
-                                               target_names=['STOP','NEW', 'OLD'],
-                                               output_dict=True)
-
-report_filename="Report_{}.csv".format(model_RNN_name)
-
-report_df = pd.DataFrame(report).transpose()
-
-report_df.to_csv(os.path.join(sensor_model_folder,report_filename))
 
 
