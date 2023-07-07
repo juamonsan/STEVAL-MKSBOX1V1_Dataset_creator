@@ -358,34 +358,32 @@ def Test_Set_Creator(full_path_test):
     tam_samples_test= len(Current_file_test.readlines())#number of lectures in a window sample (rows in each .csv)
     num_features_test = 3 #axis number (3 for accel) TODO: read column number from the file
 
-    ##print("Number of samples: {}\nSample size: {}\nNumber of features: {}".format(num_samples_test,tam_samples_test,num_features_test))
-    ##print("-----------------------\nPlot example for first file:\n-----------------------")
-
     file_class_test=int(Current_file_path_test[-6:-4])-1 # Class is in the filename, at the end, just before file extension
-    ##print("The class for this file is {}".format(file_class_test))
 
     Current_file_test.close() # Close file
+    
+    TestDataX=np.empty([num_samples_test, tam_samples_test, num_features_test]) # Empty numpy array we will fill with data from .csv files
+    TestDataY=np.empty([num_samples_test])
 
-    TestDataX=np.empty([num_samples, tam_samples, num_features]) # Empty numpy array we will fill with data from .csv files
-    TestDataY=np.empty([num_samples])
-
-    for i in range (num_samples):
-        Current_file_path = os.path.join(full_path,os.listdir(full_path)[i])
-        Current_CSV=np.genfromtxt (Current_file_path, delimiter=",")
+    for i in range (num_samples_test):
+        Current_file_path_test = os.path.join(full_path_test,os.listdir(full_path_test)[i])
+        Current_CSV=np.genfromtxt (Current_file_path_test, delimiter=",")
         TestDataX[i]=Current_CSV
 
-        file_class=int(Current_file_path[-6:-4])
+        file_class=int(Current_file_path_test[-6:-4])
         TestDataY[i]=file_class-1 #first class is class 1, but now we start from 0
 
     TestDataY = to_categorical(TestDataY)
-
-    if np.any(np.isnan(DataX)):
+    
+    if np.any(np.isnan(TestDataX)):
         print("DANGER!! NaN values found in DataX!!")
-
-    if np.any(np.isnan(DataY)):
+    
+    if np.any(np.isnan(TestDataY)):
         print("DANGER!! NaN values found in DataY!!")
 
     return TestDataX, TestDataY
+
+
 #----------------------------------------------------------------------
 # DEFINITIONS END
 #----------------------------------------------------------------------
