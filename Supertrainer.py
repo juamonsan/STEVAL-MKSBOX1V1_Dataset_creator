@@ -1,3 +1,18 @@
+#----------------------------------------------------------------------
+#
+# SUPERTRAINER.PY
+#
+#
+#----------------------------------------------------------------------
+#
+# Author: Juan M. Montes
+# GitHub: https://github.com/juamonsan
+#
+#----------------------------------------------------------------------
+
+#----------------------------------------------------------------------
+#IMPORTS
+#----------------------------------------------------------------------
 import tensorflow as tf
 
 from tensorflow import keras
@@ -38,269 +53,259 @@ import seaborn as sns #for plotting confusion matrix
 
 from sklearn.model_selection import train_test_split
 
-# End
-
-def Supertrainer_LSTM_GRU(train_folder, test_folder, output_folder):
-    #Definitions
-
-    #Copiado de notebook de Curro (definiciones de distintas RNN):
-
-    def create_1layer_lstm_model(nodes,drp,input_shape):
-        
-        #input_shape = (None, 550, 3)
-
-        rnn_model = Sequential()
-
-        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-        rnn_model.add(LSTM((nodes)))
-        rnn_model.add(Dropout(drp))
-        rnn_model.add(Dense(3, activation='softmax'))
-        
-        return rnn_model
+#----------------------------------------------------------------------
+# IMPORTS END
+#----------------------------------------------------------------------
 
 
-    def create_1layer_gru_model(nodes,drp,input_shape):
-        
-        #input_shape = (None, 550, 3)
+#----------------------------------------------------------------------
+# DEFINITIONS
+#----------------------------------------------------------------------
 
-        rnn_model = Sequential()
+def create_1layer_lstm_model(nodes,drp,input_shape):
+    
+    #input_shape = (None, 550, 3)
 
-        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-        rnn_model.add(GRU((nodes)))
-        rnn_model.add(Dropout(drp))
-        rnn_model.add(Dense(3, activation='softmax'))
-        
-        return rnn_model
+    rnn_model = Sequential()
 
-
-    def create_2layer_lstm_model(nodes_1stl,nodes_2ndl,drp,input_shape):
-        
-        #input_shape = (None, 550, 3)
-
-        rnn_model = Sequential()
-
-        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-        rnn_model.add(LSTM((nodes_1stl), return_sequences=True))
-        rnn_model.add(Dropout(drp))
-        rnn_model.add(LSTM((nodes_2ndl)))
-        rnn_model.add(Dropout(drp))
-        rnn_model.add(Dense(3, activation='softmax'))
-        
-        return rnn_model
+    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+    rnn_model.add(LSTM((nodes)))
+    rnn_model.add(Dropout(drp))
+    rnn_model.add(Dense(3, activation='softmax'))
+    
+    return rnn_model
 
 
-    def create_2layer_gru_model(nodes_1stl,nodes_2ndl,drp,input_shape):
-        
-        #input_shape = (None, 550, 3)
+def create_1layer_gru_model(nodes,drp,input_shape):
+    
+    #input_shape = (None, 550, 3)
 
-        rnn_model = Sequential()
+    rnn_model = Sequential()
 
-        rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
-        rnn_model.add(GRU((nodes_1stl), return_sequences=True))
-        rnn_model.add(Dropout(drp))
-        rnn_model.add(GRU((nodes_2ndl)))
-        rnn_model.add(Dropout(drp))
-        rnn_model.add(Dense(3, activation='softmax'))
-        
-        return rnn_model
+    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+    rnn_model.add(GRU((nodes)))
+    rnn_model.add(Dropout(drp))
+    rnn_model.add(Dense(3, activation='softmax'))
+    
+    return rnn_model
 
 
-    def Model_creation(RNN_type, layers, nodes, sensor_model_folder)
+def create_2layer_lstm_model(nodes_1stl,nodes_2ndl,drp,input_shape):
+    
+    #input_shape = (None, 550, 3)
 
-        #Parameters
-        nodes_1 = nodes # Specify nodes for first layer 32
-        nodes_2 = nodes_1/2 # Specify nodes for second layer 16
-        drp = 0.3 # Specify droput rate
+    rnn_model = Sequential()
 
-        input_shape=(None,tam_samples, num_features) #this should not be changed since it depends on the loaded file
+    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+    rnn_model.add(LSTM((nodes_1stl), return_sequences=True))
+    rnn_model.add(Dropout(drp))
+    rnn_model.add(LSTM((nodes_2ndl)))
+    rnn_model.add(Dropout(drp))
+    rnn_model.add(Dense(3, activation='softmax'))
+    
+    return rnn_model
 
-        if RNN_type == 'GRU':
-            if layers == 1:
-                model_RNN = create_1layer_gru_model(nodes_1,drp,input_shape)
-                model_RNN_name = 'GRU_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
-            elif layers == 2:
-                model_RNN = create_2layer_gru_model(nodes_1,nodes_2,drp,input_shape)
-                model_RNN_name = 'GRU_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
-            else:
-                print("ERROR, incorrect parameters")
-        elif RNN_type == 'LSTM':
-            if layers == 1:
-                model_RNN = create_1layer_lstm_model(nodes_1,drp,input_shape)
-                model_RNN_name = 'LSTM_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
-            elif layers == 2:
-                model_RNN = create_2layer_lstm_model(nodes_1,nodes_2,drp,input_shape)
-                model_RNN_name = 'LSTM_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
-            else:
-                print("ERROR, incorrect parameters")
+
+def create_2layer_gru_model(nodes_1stl,nodes_2ndl,drp,input_shape):
+    
+    #input_shape = (None, 550, 3)
+
+    rnn_model = Sequential()
+
+    rnn_model.add(BatchNormalization(batch_input_shape = input_shape))
+    rnn_model.add(GRU((nodes_1stl), return_sequences=True))
+    rnn_model.add(Dropout(drp))
+    rnn_model.add(GRU((nodes_2ndl)))
+    rnn_model.add(Dropout(drp))
+    rnn_model.add(Dense(3, activation='softmax'))
+    
+    return rnn_model
+
+
+def Model_creation(RNN_type, layers, nodes, sensor_model_folder):
+
+    #Parameters
+    nodes_1 = nodes # Specify nodes for first layer 32
+    nodes_2 = nodes_1/2 # Specify nodes for second layer 16
+    drp = 0.3 # Specify droput rate
+
+    input_shape=(None,tam_samples, num_features) #this should not be changed since it depends on the loaded file
+
+    if RNN_type == 'GRU':
+        if layers == 1:
+            model_RNN = create_1layer_gru_model(nodes_1,drp,input_shape)
+            model_RNN_name = 'GRU_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
+        elif layers == 2:
+            model_RNN = create_2layer_gru_model(nodes_1,nodes_2,drp,input_shape)
+            model_RNN_name = 'GRU_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
         else:
             print("ERROR, incorrect parameters")
+    elif RNN_type == 'LSTM':
+        if layers == 1:
+            model_RNN = create_1layer_lstm_model(nodes_1,drp,input_shape)
+            model_RNN_name = 'LSTM_1l_{0:0>2}_{1:0>4}Hz'.format(nodes_1,freq_samples)
+        elif layers == 2:
+            model_RNN = create_2layer_lstm_model(nodes_1,nodes_2,drp,input_shape)
+            model_RNN_name = 'LSTM_2l_{0:0>2}_{1:0>2}_{2:0>4}Hz'.format(nodes_1,nodes_2,freq_samples)
+        else:
+            print("ERROR, incorrect parameters")
+    else:
+        print("ERROR, incorrect parameters")
 
-              
-        #model_RNN.summary()
+          
+    #model_RNN.summary()
 
-        #Model save
+    #Model save
 
-        # Create model folder
-        models_folder = "DATA\\models"
-        sensor_model_folder=os.path.join(models_folder,sensor_folder)
-        if not os.path.exists(sensor_model_folder): 
-                        os.makedirs(sensor_model_folder)
-                
-        #set filename    
-        filename_txt="Summary_{}.txt".format(model_RNN_name)
-
-        #save summary report in a txt
-        with open(os.path.join(sensor_model_folder,filename_txt), 'w') as f:
-            model_RNN.summary(print_fn=lambda x: f.write(x + '\n'))
-        f.close()
-
-        #Compile
-
-        opt = tf.keras.optimizers.Adam(learning_rate=0.002)
-
-        model_RNN.compile(loss='categorical_crossentropy',
-                optimizer=opt,
-                metrics=["accuracy"])
-        
-        return model_RNN
-
-
-    def Model_trainer(model_RNN, sensor_model_folder, X_train, y_train):
-
-        #Train
-
-        class train_print_cb(keras.callbacks.Callback):
-
-            def on_epoch_end(self, epoch, logs=None):
-                keys = list(logs.keys())
-                watch1 = keys[0] # watching first key (loss)
-                print(f'epoch {epoch} {watch1}: {logs[watch1]:.3f}          ', end = '\r')
-
-
-        epochs = 1000
-        batch_size = 32
-
-        callbacks = [
-            keras.callbacks.ModelCheckpoint(
-                "best_model.h5", save_best_only=True, monitor="val_loss"
-            ),
-            keras.callbacks.ReduceLROnPlateau(
-                monitor="val_loss", factor=0.5, patience=20, min_lr=0.0001
-            ),
-            keras.callbacks.EarlyStopping(monitor="val_loss", patience=70, verbose=1),
-            train_print_cb()
-        ]
-        #print("Training starting soon...")
-        with tf.device('/gpu:0'):
-            history = model_RNN.fit(
-                X_train,
-                y_train,
-                batch_size=batch_size,
-                epochs=epochs,
-                callbacks=callbacks,
-                validation_data = (X_test, y_test),
-                verbose=0,
-            )
+    # Create model folder
+    models_folder = "DATA\\models"
+    sensor_model_folder=os.path.join(models_folder,sensor_folder)
+    if not os.path.exists(sensor_model_folder): 
+                    os.makedirs(sensor_model_folder)
             
-        #print("Training done!!")
+    #set filename    
+    filename_txt="Summary_{}.txt".format(model_RNN_name)
 
-        #Model save
-        best_model_RNN_name = 'best_model_{}.h5'.format(model_RNN_name)
-        models_folder = "DATA\\models"
-        #sensor_folder = sensor_folder # This was read some boxes before, when dataset was loaded
-        sensor_model_folder=os.path.join(models_folder,sensor_folder) 
+    #save summary report in a txt
+    with open(os.path.join(sensor_model_folder,filename_txt), 'w') as f:
+        model_RNN.summary(print_fn=lambda x: f.write(x + '\n'))
+    f.close()
 
-        if not os.path.exists(sensor_model_folder): 
-                        os.makedirs(sensor_model_folder)
+    #Compile
 
+    opt = tf.keras.optimizers.Adam(learning_rate=0.002)
 
-        model_RNN.save(os.path.join(sensor_model_folder, best_model_RNN_name))
-        #print("Model succesfully saved in {}".format(sensor_model_folder))
-
-        #save progression graph
-        metric = "accuracy"
-        plt.figure()
-        plt.plot(history.history[metric])
-        plt.plot(history.history["val_" + metric])
-        plt.title("model " + metric)
-        plt.ylabel(metric, fontsize="large")
-        plt.xlabel("epoch", fontsize="large")
-        plt.legend(["train", "val"], loc="best")
-
-        figname_pdf="MT_{}.pdf".format(model_RNN_name)
-        figname_png="MT_{}.png".format(model_RNN_name)
-        plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
-        plt.savefig(os.path.join(sensor_model_folder,figname_png))
-
-        #plt.show()
-        plt.close()
+    model_RNN.compile(loss='categorical_crossentropy',
+            optimizer=opt,
+            metrics=["accuracy"])
+    
+    return model_RNN
 
 
-    def Model_evaluator(MODELPATH, sensor_model_folder, model_RNN_name, TestDataX, TestDataY):
+def Model_trainer(model_RNN, sensor_model_folder, X_train, y_train):
 
-        model = tf.keras.models.load_model(MODELPATH)
-        pred = model.predict(TestDataX)
+    #Train
 
-        # CONF MATRIX
-        y_pred = np.argmax(pred, axis = 1)
-        p = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2])
-        p_norm = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2], normalize='true')
+    class train_print_cb(keras.callbacks.Callback):
 
-        T_lables = ['STOP','NEW','OLD']    
+        def on_epoch_end(self, epoch, logs=None):
+            keys = list(logs.keys())
+            watch1 = keys[0] # watching first key (loss)
+            print(f'epoch {epoch} {watch1}: {logs[watch1]:.3f}          ', end = '\r')
 
-        ax= plt.subplot()
 
-        # Set values format
-        values = ["{0:0.0f}".format(x) for x in p.flatten()]
+    epochs = 1000
+    batch_size = 32
 
-        # Find percentages and set format
-        percentages = ["{0:.1%}".format(x) for x in p_norm.flatten()]
-
-        # Combine classes, values and percentages to show 
-        combined = [f"{i}\n{j}" for i, j in zip(values, percentages)]
-        combined = np.asarray(combined).reshape(3,3)
-
-        sns.heatmap(p_norm, annot=combined, fmt='', ax=ax, cmap="Greens", cbar_kws={"ticks":[0,0.5,1], "format":'%.1f'});  #annot=True to annotate cells
-
-        # labels, title and ticks
-        ax.set_xlabel('Predicted labels');ax.set_ylabel('True labels'); 
-        ax.set_title('Confusion Matrix'); 
-        ax.xaxis.set_ticklabels(T_lables); ax.yaxis.set_ticklabels(T_lables);
-
-        # save the figure
-        figname_pdf="CM_{}.pdf".format(model_RNN_name)
-        figname_png="CM_{}.png".format(model_RNN_name)
-        plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
-        plt.savefig(os.path.join(sensor_model_folder,figname_png))
-
-        plt.close()
-
-        # REPORT
-        report = sklearn.metrics.classification_report(TestDataY.argmax(axis=1),
-                                                       y_pred,
-                                                       target_names=['STOP','NEW', 'OLD'],
-                                                       output_dict=True)
-
-        report_filename="Report_{}.csv".format(model_RNN_name)
-
-        report_df = pd.DataFrame(report).transpose()
-
-        report_df.to_csv(os.path.join(sensor_model_folder,report_filename))
+    callbacks = [
+        keras.callbacks.ModelCheckpoint(
+            "best_model.h5", save_best_only=True, monitor="val_loss"
+        ),
+        keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss", factor=0.5, patience=20, min_lr=0.0001
+        ),
+        keras.callbacks.EarlyStopping(monitor="val_loss", patience=70, verbose=1),
+        train_print_cb()
+    ]
+    #print("Training starting soon...")
+    with tf.device('/gpu:0'):
+        history = model_RNN.fit(
+            X_train,
+            y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            callbacks=callbacks,
+            validation_data = (X_test, y_test),
+            verbose=0,
+        )
         
+    #print("Training done!!")
+
+    #Model save
+    best_model_RNN_name = 'best_model_{}.h5'.format(model_RNN_name)
+    models_folder = "DATA\\models"
+    #sensor_folder = sensor_folder # This was read some boxes before, when dataset was loaded
+    sensor_model_folder=os.path.join(models_folder,sensor_folder) 
+
+    if not os.path.exists(sensor_model_folder): 
+                    os.makedirs(sensor_model_folder)
 
 
+    model_RNN.save(os.path.join(sensor_model_folder, best_model_RNN_name))
+    #print("Model succesfully saved in {}".format(sensor_model_folder))
 
-    #start
+    #save progression graph
+    metric = "accuracy"
+    plt.figure()
+    plt.plot(history.history[metric])
+    plt.plot(history.history["val_" + metric])
+    plt.title("model " + metric)
+    plt.ylabel(metric, fontsize="large")
+    plt.xlabel("epoch", fontsize="large")
+    plt.legend(["train", "val"], loc="best")
+
+    figname_pdf="MT_{}.pdf".format(model_RNN_name)
+    figname_png="MT_{}.png".format(model_RNN_name)
+    plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
+    plt.savefig(os.path.join(sensor_model_folder,figname_png))
+
+    #plt.show()
+    plt.close()
 
 
-        
-    #comment next line for having debug info on the rest of the code
-    tf.debugging.set_log_device_placement(False)
+def Model_evaluator(MODELPATH, sensor_model_folder, model_RNN_name, TestDataX, TestDataY):
 
+    model = tf.keras.models.load_model(MODELPATH)
+    pred = model.predict(TestDataX)
 
-    # TRAIN SET CREATOR
-    #Select sensor csv folder:
+    # CONF MATRIX
+    y_pred = np.argmax(pred, axis = 1)
+    p = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2])
+    p_norm = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2], normalize='true')
 
+    T_lables = ['STOP','NEW','OLD']    
+
+    ax= plt.subplot()
+
+    # Set values format
+    values = ["{0:0.0f}".format(x) for x in p.flatten()]
+
+    # Find percentages and set format
+    percentages = ["{0:.1%}".format(x) for x in p_norm.flatten()]
+
+    # Combine classes, values and percentages to show 
+    combined = [f"{i}\n{j}" for i, j in zip(values, percentages)]
+    combined = np.asarray(combined).reshape(3,3)
+
+    sns.heatmap(p_norm, annot=combined, fmt='', ax=ax, cmap="Greens", cbar_kws={"ticks":[0,0.5,1], "format":'%.1f'});  #annot=True to annotate cells
+
+    # labels, title and ticks
+    ax.set_xlabel('Predicted labels');ax.set_ylabel('True labels'); 
+    ax.set_title('Confusion Matrix'); 
+    ax.xaxis.set_ticklabels(T_lables); ax.yaxis.set_ticklabels(T_lables);
+
+    # save the figure
+    figname_pdf="CM_{}.pdf".format(model_RNN_name)
+    figname_png="CM_{}.png".format(model_RNN_name)
+    plt.savefig(os.path.join(sensor_model_folder,figname_pdf))
+    plt.savefig(os.path.join(sensor_model_folder,figname_png))
+
+    plt.close()
+
+    # REPORT
+    report = sklearn.metrics.classification_report(TestDataY.argmax(axis=1),
+                                                   y_pred,
+                                                   target_names=['STOP','NEW', 'OLD'],
+                                                   output_dict=True)
+
+    report_filename="Report_{}.csv".format(model_RNN_name)
+
+    report_df = pd.DataFrame(report).transpose()
+
+    report_df.to_csv(os.path.join(sensor_model_folder,report_filename))
+    
+# TRAIN SET CREATOR
+def Train_Set_Creator(train_folder):
     full_path = train_folder
 
     sensor_folder=os.path.basename(os.path.normpath(full_path))
@@ -353,10 +358,12 @@ def Supertrainer_LSTM_GRU(train_folder, test_folder, output_folder):
     print("X_train shape: {} || X_test shape: {}".format(np.shape(X_train), np.shape(X_test))) # We check if the shape is correct
     print("y_train shape: {} || y_test shape: {}".format(np.shape(y_train), np.shape(y_test)))
 
+    return sensor_folder, freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test 
 
-    #TEST SET CREATOR
-    
-    full_path_test = #TEST FOLDER PATH
+
+#TEST SET CREATOR
+def Test_Set_Creator(test_folder):    
+    full_path_test = test_folder
 
     Current_file_path_test = os.path.join(full_path_test,os.listdir(full_path_test)[0])
 
@@ -392,6 +399,26 @@ def Supertrainer_LSTM_GRU(train_folder, test_folder, output_folder):
 
     if np.any(np.isnan(DataY)):
         print("DANGER!! NaN values found in DataY!!")
+
+    return TestDataX, TestDataY
+#----------------------------------------------------------------------
+# DEFINITIONS END
+#----------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------
+# MAIN CODE START
+#----------------------------------------------------------------------
+
+    #Select root folder train
+    #Select root folder test
+    #iterate folders inside root folders
+    #  for each folder, iterate different NN: GRU and LSTM with 1-2 layers, 2-64 nodes
+
+
+        
+    #comment next line for having debug info on the rest of the code
+    tf.debugging.set_log_device_placement(False)
 
 
 
