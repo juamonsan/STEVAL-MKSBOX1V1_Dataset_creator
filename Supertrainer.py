@@ -122,7 +122,7 @@ def create_2layer_gru_model(nodes_1stl,nodes_2ndl,drp,input_shape):
     return rnn_model
 
 
-def Model_creation(RNN_type, layers, nodes, sensor_model_folder):
+def Model_creation(RNN_type, layers, nodes, sensor_model_folder, nodes_1, freq_samples, tam_samples, num_features):
 
     #Parameters
     nodes_1 = nodes # Specify nodes for first layer 32
@@ -157,12 +157,7 @@ def Model_creation(RNN_type, layers, nodes, sensor_model_folder):
 
     #Model save
 
-    # Create model folder
-    models_folder = "DATA\\models"
-    sensor_model_folder=os.path.join(models_folder,sensor_folder)
-    if not os.path.exists(sensor_model_folder): 
-                    os.makedirs(sensor_model_folder)
-            
+           
     #set filename    
     filename_txt="Summary_{}.txt".format(model_RNN_name)
 
@@ -179,10 +174,10 @@ def Model_creation(RNN_type, layers, nodes, sensor_model_folder):
             optimizer=opt,
             metrics=["accuracy"])
     
-    return model_RNN
+    return model_RNN, model_RNN_name
 
 
-def Model_trainer(model_RNN, sensor_model_folder, X_train, y_train):
+def Model_trainer(model_RNN, model_RNN_name, sensor_model_folder, X_train, y_train):
 
     #Train
 
@@ -223,13 +218,6 @@ def Model_trainer(model_RNN, sensor_model_folder, X_train, y_train):
 
     #Model save
     best_model_RNN_name = 'best_model_{}.h5'.format(model_RNN_name)
-    models_folder = "DATA\\models"
-    #sensor_folder = sensor_folder # This was read some boxes before, when dataset was loaded
-    sensor_model_folder=os.path.join(models_folder,sensor_folder) 
-
-    if not os.path.exists(sensor_model_folder): 
-                    os.makedirs(sensor_model_folder)
-
 
     model_RNN.save(os.path.join(sensor_model_folder, best_model_RNN_name))
     #print("Model succesfully saved in {}".format(sensor_model_folder))
@@ -251,11 +239,11 @@ def Model_trainer(model_RNN, sensor_model_folder, X_train, y_train):
 
     #plt.show()
     plt.close()
+    return model_RNN
 
 
-def Model_evaluator(MODELPATH, sensor_model_folder, model_RNN_name, TestDataX, TestDataY):
+def Model_evaluator(model, sensor_model_folder, model_RNN_name, TestDataX, TestDataY):
 
-    model = tf.keras.models.load_model(MODELPATH)
     pred = model.predict(TestDataX)
 
     # CONF MATRIX
@@ -308,8 +296,6 @@ def Model_evaluator(MODELPATH, sensor_model_folder, model_RNN_name, TestDataX, T
 def Train_Set_Creator(train_folder):
     full_path = train_folder
 
-    sensor_folder=os.path.basename(os.path.normpath(full_path))
-
     Current_file_path = os.path.join(full_path,os.listdir(full_path)[0])
 
     Current_file = open(Current_file_path) # Open first file for counting rows
@@ -358,12 +344,11 @@ def Train_Set_Creator(train_folder):
     print("X_train shape: {} || X_test shape: {}".format(np.shape(X_train), np.shape(X_test))) # We check if the shape is correct
     print("y_train shape: {} || y_test shape: {}".format(np.shape(y_train), np.shape(y_test)))
 
-    return sensor_folder, freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test 
+    return freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test 
 
 
 #TEST SET CREATOR
-def Test_Set_Creator(test_folder):    
-    full_path_test = test_folder
+def Test_Set_Creator(full_path_test):    
 
     Current_file_path_test = os.path.join(full_path_test,os.listdir(full_path_test)[0])
 
@@ -413,13 +398,41 @@ def Test_Set_Creator(test_folder):
     #Select root folder train
     #Select root folder test
     #iterate folders inside root folders
-    #  for each folder, iterate different NN: GRU and LSTM with 1-2 layers, 2-64 nodes
+    #  for each folder, iterate different NN: GRU and LSTM with 1-2 layers, 2-64 nodes, and validate
 
 
         
-    #comment next line for having debug info on the rest of the code
-    tf.debugging.set_log_device_placement(False)
+#set to True for having debug info on the rest of the code
+tf.debugging.set_log_device_placement(False)
 
+train_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\train"
+test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
+output_folder="DATA\\models"
+
+for i in range(len(os.listdir(train_folder))):
+    current_train_folder=os.path.join(train_folder,os.listdir(train_folder)[i]) #access folders by order
+    current_test_folder=os.path.join(test_folder,os.listdir(test_folder)[i])   #test folder must have the exact same folders that train folder has    
+    sensor_folder=os.path.basename(os.path.normpath(current_train_folder))   #sensor name by folder name for naming files
+    
+    current_output_folder=os.path.join(output_folder,sensor_folder)
+    if not os.path.exists(current_output_folder): 
+                    os.makedirs(current_output_folder)
+    
+    freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test=Train_Set_Creator(current_train_folder)
+    TestDataX, TestDataY=Test_Set_Creator(current_test_folder)
+    for layers in range (1,2,1):    
+        for nodes in range(2, 64):
+            model, model_name=Model_creation(LSTM, layers, nodes, current_output_folder, nodes_1, freq_samples, tam_samples, num_features)
+            model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+            Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
+            nodes=nodes*2
+    for layers in range (1,2,1):    
+        for nodes in range(2, 64):
+            model, model_name=Model_creation(GRU, layers, nodes, sensor_model_folder)
+            model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+            Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
+            nodes=nodes*2
+        
 
 
 
