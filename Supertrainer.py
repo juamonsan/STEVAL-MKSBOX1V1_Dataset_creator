@@ -408,7 +408,7 @@ test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
 output_folder="DATA\\models"
 
 for i in range(len(os.listdir(train_folder))):
-    print("Starting folder {} of {}".format(i, len(os.listdir(train_folder))
+    print("---------------\nStarting folder {} of {}\n---------------".format(i+1, len(os.listdir(train_folder))))
     current_train_folder=os.path.join(train_folder,os.listdir(train_folder)[i]) #access folders by order
     current_test_folder=os.path.join(test_folder,os.listdir(test_folder)[i])   #test folder must have the exact same folders that train folder has    
     sensor_folder=os.path.basename(os.path.normpath(current_train_folder))   #sensor name by folder name for naming files
@@ -419,20 +419,25 @@ for i in range(len(os.listdir(train_folder))):
     
     freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test=Train_Set_Creator(current_train_folder)
     TestDataX, TestDataY=Test_Set_Creator(current_test_folder)
-    for layers in range (1,2,1):    
-        for nodes in range(2, 64):
+    for layers in range (1,3,1):
+        nodes=2
+        while nodes <=64:
+            print("GRU {} layers and {} nodes".format(layers, nodes))
+            model, model_name=Model_creation("GRU", layers, nodes, current_output_folder, freq_samples, tam_samples, num_features)
+            #print(model_name)
+            model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+            Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
+            nodes=nodes*2
+            
+        nodes=2
+        while nodes <=64:
+            print("LSTM {} layers and {} nodes".format(layers, nodes))
             model, model_name=Model_creation("LSTM", layers, nodes, current_output_folder, freq_samples, tam_samples, num_features)
-            print(model_name)
+            #print(model_name)
             model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
             Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
             nodes=nodes*2
-    for layers in range (1,2,1):    
-        for nodes in range(2, 64):
-            model, model_name=Model_creation("GRU", layers, nodes, sensor_model_folder)
-            print(model_name)
-            model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
-            Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
-            nodes=nodes*2
+            
         
 
 
