@@ -126,7 +126,7 @@ def Model_creation(RNN_type, layers, nodes, sensor_model_folder, freq_samples, t
 
     #Parameters
     nodes_1 = nodes # Specify nodes for first layer 32
-    nodes_2 = nodes_1/2 # Specify nodes for second layer 16
+    nodes_2 = int(nodes_1/2) # Specify nodes for second layer 16
     drp = 0.3 # Specify droput rate
 
     input_shape=(None,tam_samples, num_features) #this should not be changed since it depends on the loaded file
@@ -407,7 +407,7 @@ train_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\train"
 test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
 output_folder="DATA\\models"
 
-for i in range(len(os.listdir(train_folder))):
+for i in range(3,len(os.listdir(train_folder))):
     print("---------------\nStarting folder {} of {}\n---------------".format(i+1, len(os.listdir(train_folder))))
     current_train_folder=os.path.join(train_folder,os.listdir(train_folder)[i]) #access folders by order
     current_test_folder=os.path.join(test_folder,os.listdir(test_folder)[i])   #test folder must have the exact same folders that train folder has    
