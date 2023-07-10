@@ -406,8 +406,9 @@ tf.debugging.set_log_device_placement(False)
 train_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\train"
 test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
 output_folder="DATA\\models"
+start_at_folder=0 #For skipping first folders (if 0 starts from the beginning)
 
-for i in range(3,len(os.listdir(train_folder))):
+for i in range(start_at_folder, len(os.listdir(train_folder))): 
     print("---------------\nStarting folder {} of {}\n---------------".format(i+1, len(os.listdir(train_folder))))
     current_train_folder=os.path.join(train_folder,os.listdir(train_folder)[i]) #access folders by order
     current_test_folder=os.path.join(test_folder,os.listdir(test_folder)[i])   #test folder must have the exact same folders that train folder has    
