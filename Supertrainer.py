@@ -36,7 +36,6 @@ import pathlib #for system folders and files management
 import pandas as pd #for Dataframe handling
 
 from IPython.display import display # for folder selection dialog
-from ipyfilechooser import FileChooser # for folder selection dialog
 
 import numpy as np
 import math
