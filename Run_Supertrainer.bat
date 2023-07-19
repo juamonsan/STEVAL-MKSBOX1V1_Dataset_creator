@@ -1,0 +1,2 @@
+:: call "<condapath>\Scripts\activate.bat" <env_name> & cd "<folder_for_your_py_script>" & python <scriptname.py> [<arguments>]
+call "C:\Users\JMontes\anaconda3\Scripts\activate.bat" Test_Env_1 & cd "D:\GIT\STEVAL-MKSBOX1V1_Dataset_creator" & python Supertrainer.py
