@@ -35,6 +35,8 @@ import os #for system folders and files management
 import pathlib #for system folders and files management
 import pandas as pd #for Dataframe handling
 
+from datetime import datetime #getting current time for naming the result file
+
 from IPython.display import display # for folder selection dialog
 
 import numpy as np
@@ -198,7 +200,7 @@ def Model_trainer(model_RNN, model_RNN_name, sensor_model_folder, X_train, y_tra
         keras.callbacks.ReduceLROnPlateau(
             monitor="val_loss", factor=0.5, patience=20, min_lr=0.0001
         ),
-        keras.callbacks.EarlyStopping(monitor="val_loss", patience=70, verbose=1),
+        keras.callbacks.EarlyStopping(monitor="val_loss", patience=120, verbose=1),
         train_print_cb()
     ]
     #print("Training starting soon...")
@@ -404,7 +406,8 @@ tf.debugging.set_log_device_placement(False)
 
 train_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\train"
 test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
-output_folder="DATA\\models"
+now = datetime.now() # current date and time
+output_folder="DATA\\models_{}".format(now.strftime("%Y%m%d_%H%M%S")) #Added auto-naming of output (from current date and time)
 start_at_folder=0 #For skipping first folders (if 0 starts from the beginning)
 
 for i in range(start_at_folder, len(os.listdir(train_folder))): 
