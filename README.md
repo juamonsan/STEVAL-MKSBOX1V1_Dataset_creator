@@ -5,7 +5,8 @@
  1. CONDA_environment.yaml is the exported environment from Anaconda with all the necessary installs for this project. You must install [Anaconda](https://anaconda.org) and then you can use this file for easy environment configuration if you wish.
  2. Notebooks numbered 1 to 3 shows step by step the the whole process, starting from RAW data and ending with an already trained and quatified RNN model ready for deployment on a MCU. You must use Jupyter Notebook (available from Anaconda environment) for using this files.
  3. Notebooks 4 and 5 are optional steps for data preparation, possible needed for large sets of data in several files.
- 4. TEST_DATA folder containing:
+ 4. Notebook 6 is also optional and it is used to generate a single .csv report file containing all metrics for all models trained.
+ 5. TEST_DATA folder containing:
     - Uncompressed small test dataset with labeled data from a single peristaltic pump, for quick demonstration only.
     - Compressed real full dataset named "1_Pump_3_Class_PM_dataset_(full_processed).7z" with labeled data from a single peristaltic pump, for real predictive maintenance purposes. [7zip](https://www.7-zip.org/) is needed for decompression. This dataset includes already isolated data for training and for testing, in separate folders for each sensor and each sampling frequency. Train and test data are taken from different batches and using different peristaltic pieces, so it is perfect for hold out cross validation.
  6. Supertrainer.py Python script is a custom program for training automatically many different configurations with the full processed dataset inside TEST_DATA folder (compressed).
