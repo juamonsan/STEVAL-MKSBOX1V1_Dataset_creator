@@ -2,6 +2,10 @@
 #
 # SUPERTRAINER.PY
 #
+# Automatically trains all combinations of GRU and LSTM 
+# for each data folder in desired path
+#
+# TODO: Paths, patience, start_at_folder... as command parameters 
 #
 #----------------------------------------------------------------------
 #
@@ -200,7 +204,7 @@ def Model_trainer(model_RNN, model_RNN_name, sensor_model_folder, X_train, y_tra
         keras.callbacks.ReduceLROnPlateau(
             monitor="val_loss", factor=0.5, patience=20, min_lr=0.0001
         ),
-        keras.callbacks.EarlyStopping(monitor="val_loss", patience=120, verbose=1),
+        keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, verbose=1),
         train_print_cb()
     ]
     #print("Training starting soon...")
