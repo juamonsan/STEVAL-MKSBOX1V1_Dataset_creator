@@ -261,7 +261,8 @@ def Model_evaluator(model, sensor_model_folder, model_RNN_name, TestDataX, TestD
     p = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2])
     p_norm = sklearn.metrics.confusion_matrix(TestDataY.argmax(axis=1), y_pred, labels=[0,1,2], normalize='true')
 
-    T_lables = ['STOP','NEW','OLD']    
+    #T_lables = ['STOP','NEW','OLD']
+    T_lables = ['STOP', 'NORMAL', 'BUBBLE']
 
     ax= plt.subplot()
 
@@ -413,8 +414,8 @@ def Test_Set_Creator(full_path_test):
 #set to True for having debug info on the rest of the code
 tf.debugging.set_log_device_placement(False)
 
-train_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\train"
-test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
+train_folder="DATA\\1_Pump_3_Class_Bubble_dataset_(full_processed)\\train"
+test_folder="DATA\\1_Pump_3_Class_Bubble_dataset_(full_processed)\\test"
 now = datetime.now() # current date and time
 output_folder="DATA\\models_{}".format(now.strftime("%Y%m%d_%H%M%S")) #Added auto-naming of output (from current date and time)
 start_at_folder=0 #For skipping first folders (if 0 starts from the beginning)
