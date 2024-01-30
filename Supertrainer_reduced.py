@@ -414,10 +414,10 @@ def Test_Set_Creator(full_path_test):
 #set to True for having debug info on the rest of the code
 tf.debugging.set_log_device_placement(False)
 
-train_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\train"
-test_folder="DATA\\1_Pump_3_Class_PM_dataset_(full_processed)\\test"
+train_folder="DATA\\231231_Reduced_dataset\\train"
+test_folder="DATA\\231231_Reduced_dataset\\test"
 now = datetime.now() # current date and time
-output_folder="DATA\\models_{}".format(now.strftime("%Y%m%d_%H%M%S")) #Added auto-naming of output (from current date and time)
+output_folder="DATA\\models_reduced_{}".format(now.strftime("%Y%m%d_%H%M%S")) #Added auto-naming of output (from current date and time)
 start_at_folder=0 #For skipping first folders (if 0 starts from the beginning)
 
 for i in range(start_at_folder, len(os.listdir(train_folder))): 
@@ -432,25 +432,219 @@ for i in range(start_at_folder, len(os.listdir(train_folder))):
     
     freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test=Train_Set_Creator(current_train_folder)
     TestDataX, TestDataY=Test_Set_Creator(current_test_folder)
-    for layers in range (1,3,1):
-        nodes=2
-        while nodes <=64:
-            print("GRU {} layers and {} nodes".format(layers, nodes))
-            model, model_name=Model_creation("GRU", layers, nodes, current_output_folder, freq_samples, tam_samples, num_features)
-            #print(model_name)
-            model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
-            Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
-            nodes=nodes*2
+    
+    if freq_samples == 1600:
+        model, model_name=Model_creation("LSTM", 1, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 8, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 16, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 32, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                
+        model, model_name=Model_creation("LSTM", 2, 64, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+    elif freq_samples == 800:
             
-        nodes=2
-        while nodes <=64:
-            print("LSTM {} layers and {} nodes".format(layers, nodes))
-            model, model_name=Model_creation("LSTM", layers, nodes, current_output_folder, freq_samples, tam_samples, num_features)
-            #print(model_name)
-            model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
-            Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
-            nodes=nodes*2
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                    
+        model, model_name=Model_creation("LSTM", 1, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                                    
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                                    
+        model, model_name=Model_creation("LSTM", 2, 16, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+    elif freq_samples == 400:
             
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                    
+        model, model_name=Model_creation("LSTM", 2, 32, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                
+    elif freq_samples == 200:
+            
+        model, model_name=Model_creation("LSTM", 1, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                    
+        model, model_name=Model_creation("LSTM", 2, 64, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+                        
+    elif freq_samples == 25:
+            
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+                        
+    elif freq_samples == 12:
+            
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+                    
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+    elif freq_samples == 1100:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 32, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+                
+    elif freq_samples == 550:
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 8, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+    elif freq_samples == 17:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+
+    elif freq_samples == 6667:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+    elif freq_samples == 3333:
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+
+    elif freq_samples == 1666:
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+
+
+    elif freq_samples == 833:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+
+    elif freq_samples == 416:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+       
+
+    elif freq_samples == 52:
+       
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)    
+    
+
+    elif freq_samples == 26:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+
+
+    elif freq_samples == 13:
+        model, model_name=Model_creation("GRU", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)
+        
+        model, model_name=Model_creation("LSTM", 2, 4, current_output_folder, freq_samples, tam_samples, num_features)
+        print(model_name)
+        model=Model_trainer(model, model_name, current_output_folder, X_train, y_train)
+        Model_evaluator(model, current_output_folder, model_name, TestDataX, TestDataY)        
+    
+        
         
 
 
