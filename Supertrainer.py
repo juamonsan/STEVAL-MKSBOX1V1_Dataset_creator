@@ -5,7 +5,7 @@
 # Automatically trains all combinations of GRU and LSTM 
 # for each data folder in desired path
 #
-# TODO: Paths, patience, start_at_folder... as command parameters 
+# TODO: Paths, patience, start_at_folder, random_seed... as command parameters 
 #
 #----------------------------------------------------------------------
 #
@@ -304,7 +304,7 @@ def Model_evaluator(model, sensor_model_folder, model_RNN_name, TestDataX, TestD
     report_df.to_csv(os.path.join(sensor_model_folder,report_filename))
     
 # TRAIN SET CREATOR
-def Train_Set_Creator(train_folder):
+def Train_Set_Creator(train_folder, random_seed):
     full_path = train_folder
 
     Current_file_path = os.path.join(full_path,os.listdir(full_path)[0])
@@ -350,8 +350,8 @@ def Train_Set_Creator(train_folder):
     if np.any(np.isnan(DataY)):
         print("DANGER!! NaN values found in DataY!!")
 
-
-    X_train, X_test, y_train, y_test = train_test_split(DataX, DataY, test_size=0.15, random_state=100, stratify=DataY)
+    # train_test_split uses a random seed int value from arguments
+    X_train, X_test, y_train, y_test = train_test_split(DataX, DataY, test_size=0.15, random_state=random_seed, stratify=DataY) 
     print("X_train shape: {} || X_test shape: {}".format(np.shape(X_train), np.shape(X_test))) # We check if the shape is correct
     print("y_train shape: {} || y_test shape: {}".format(np.shape(y_train), np.shape(y_test)))
 
@@ -420,6 +420,9 @@ now = datetime.now() # current date and time
 output_folder="DATA\\models_{}".format(now.strftime("%Y%m%d_%H%M%S")) #Added auto-naming of output (from current date and time)
 start_at_folder=0 #For skipping first folders (if 0 starts from the beginning)
 
+random_seed=100; 
+#random_seed=random.randint(0,1000); #Uncomment for random splits between train and validation
+
 for i in range(start_at_folder, len(os.listdir(train_folder))): 
     print("---------------\nStarting folder {} of {}\n---------------".format(i+1, len(os.listdir(train_folder))))
     current_train_folder=os.path.join(train_folder,os.listdir(train_folder)[i]) #access folders by order
@@ -430,7 +433,7 @@ for i in range(start_at_folder, len(os.listdir(train_folder))):
     if not os.path.exists(current_output_folder): 
                     os.makedirs(current_output_folder)
     
-    freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test=Train_Set_Creator(current_train_folder)
+    freq_samples, num_samples, tam_samples, num_features, X_train, X_test, y_train, y_test=Train_Set_Creator(current_train_folder, random_seed)
     TestDataX, TestDataY=Test_Set_Creator(current_test_folder)
     for layers in range (1,3,1):
         nodes=2
